@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import EmployeeList from './components/EmployeeList';
 import EmployeeForm from './components/EmployeeForm';
 import AttendancePanel from './components/AttendancePanel';
+import ActivityReport from './components/ActivityReport';
 import PayrollReport from './components/PayrollReport';
 import './App.css';
 
@@ -19,6 +20,7 @@ function App() {
             <Route path="/employees/add" element={<EmployeeForm />} />
             <Route path="/employees/edit/:id" element={<EmployeeForm />} />
             <Route path="/attendance" element={<AttendancePanel />} />
+            <Route path="/attendance/report/:id" element={<ActivityReport />} />
             <Route path="/payroll" element={<PayrollReport />} />
           </Routes>
         </div>

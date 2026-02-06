@@ -29,6 +29,8 @@ const EmployeeList = () => {
     }
   };
 
+
+
   return (
     <div>
       <div className="header-actions">
@@ -58,12 +60,15 @@ const EmployeeList = () => {
               <td>₹{employee.hourly_rate}</td>
               <td>
                 <Link to={`/employees/edit/${employee.id}`} className="btn btn-primary" style={{marginRight: '5px'}}>Edit</Link>
+                <Link to={`/attendance/report/${employee.id}`} className="btn btn-info" style={{marginRight: '5px'}}>Activity</Link>
                 <button className="btn btn-danger" onClick={() => deleteEmployee(employee.id)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      
+
     </div>
   );
 };

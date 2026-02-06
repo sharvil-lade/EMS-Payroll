@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from datetime import date
 from app import crud, schemas
 from app.core.database import get_db
 
@@ -30,3 +31,12 @@ def logout_employee(employee_id: int, db: Session = Depends(get_db)):
          return crud.check_out(db, employee_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/report", response_model=schemas.AttendanceReportResponse)
+def get_attendance_report(
+    employee_id: int, 
+    start_date: date, 
+    end_date: date, 
+    db: Session = Depends(get_db)
+):
+    return crud.get_attendance_report(db, employee_id, start_date, end_date)

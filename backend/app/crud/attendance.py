@@ -1,19 +1,26 @@
 from sqlalchemy.orm import Session
-from datetime import datetime, date
+from sqlalchemy import desc
+from datetime import datetime
 from app import models
 
-def get_active_attendance(db: Session, employee_id: int, today: date):
+def get_current_active_session(db: Session, employee_id: int):
+    """
+    Returns the currently active attendance session (where logout_time is None) for the employee.
+    This handles cases where the session started on a previous day (overnight).
+    """
     return db.query(models.Attendance).filter(
         models.Attendance.employee_id == employee_id,
-        models.Attendance.date == today
-    ).first()
+        models.Attendance.logout_time == None
+    ).order_by(desc(models.Attendance.login_time)).first()
 
 def check_in(db: Session, employee_id: int):
     today = datetime.now().date()
-    existing_attendance = get_active_attendance(db, employee_id, today)
     
-    if existing_attendance:
-        raise ValueError("Attendance already exists for today.")
+    # Check if there is already an active session (login without logout)
+    active_session = get_current_active_session(db, employee_id)
+    
+    if active_session:
+        raise ValueError("Employee is already checked in. Please check out first.")
     
     new_attendance = models.Attendance(
         employee_id=employee_id,
@@ -26,14 +33,11 @@ def check_in(db: Session, employee_id: int):
     return new_attendance
 
 def check_out(db: Session, employee_id: int):
-    today = datetime.now().date()
-    attendance = get_active_attendance(db, employee_id, today)
+    # Find the active session to close
+    attendance = get_current_active_session(db, employee_id)
     
     if not attendance:
-        raise ValueError("No check-in record found for today.")
-    
-    if attendance.logout_time:
-        raise ValueError("Already checked out for today.")
+        raise ValueError("No active check-in record found. Please check in first.")
     
     attendance.logout_time = datetime.now()
     
@@ -45,3 +49,50 @@ def check_out(db: Session, employee_id: int):
     db.commit()
     db.refresh(attendance)
     return attendance
+
+
+def get_attendance_report(db: Session, employee_id: int, start_date: date, end_date: date):
+    records = db.query(models.Attendance).filter(
+        models.Attendance.employee_id == employee_id,
+        models.Attendance.date >= start_date,
+        models.Attendance.date <= end_date
+    ).order_by(models.Attendance.date).all()
+    
+    total_hours = 0.0
+    daily_map = {}
+    
+    for record in records:
+        # Sum total hours
+        # Handle case where total_hours might be None (incomplete session)
+        if record.total_hours:
+            total_hours += record.total_hours
+            
+        # Group by date for daily breakdown
+        d = record.date
+        if d not in daily_map:
+            daily_map[d] = {"sessions_count": 0, "total_hours": 0.0}
+        
+        daily_map[d]["sessions_count"] += 1
+        if record.total_hours:
+            daily_map[d]["total_hours"] += record.total_hours
+
+    daily_breakdown = []
+    for d, data in daily_map.items():
+        daily_breakdown.append({
+            "date": d,
+            "sessions_count": data["sessions_count"],
+            "total_hours": round(data["total_hours"], 2)
+        })
+    
+    # Sort breakdown by date
+    daily_breakdown.sort(key=lambda x: x["date"])
+
+    return {
+        "employee_id": employee_id,
+        "start_date": start_date,
+        "end_date": end_date,
+        "total_hours": round(total_hours, 2),
+        "total_sessions": len(records),
+        "daily_breakdown": daily_breakdown
+    }
+
