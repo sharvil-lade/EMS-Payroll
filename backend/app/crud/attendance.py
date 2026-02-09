@@ -1,13 +1,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-from datetime import datetime
+from datetime import datetime, date
 from app import models
 
 def get_current_active_session(db: Session, employee_id: int):
-    """
-    Returns the currently active attendance session (where logout_time is None) for the employee.
-    This handles cases where the session started on a previous day (overnight).
-    """
     return db.query(models.Attendance).filter(
         models.Attendance.employee_id == employee_id,
         models.Attendance.logout_time == None
@@ -80,11 +76,11 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
     
     daily_breakdown.sort(key=lambda x: x["date"])
 
-return {
-    "employee_id": employee_id,
-    "start_date": start_date,
-    "end_date": end_date,
-    "total_hours": round(total_hours, 2),
-    "total_sessions": len(records),
-    "daily_breakdown": daily_breakdown
-}
+    return {
+        "employee_id": employee_id,
+        "start_date": start_date,
+        "end_date": end_date,
+        "total_hours": round(total_hours, 2),
+        "total_sessions": len(records),
+        "daily_breakdown": daily_breakdown
+    }
