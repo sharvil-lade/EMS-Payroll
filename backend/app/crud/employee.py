@@ -14,7 +14,17 @@ def create_employee(db: Session, employee: schemas.EmployeeCreate):
     db.refresh(db_employee)
     return db_employee
 
+
+def create_employee_bulk(db: Session, employees: list[schemas.EmployeeCreate]):
+    db_employees = [models.Employee(**employee.dict()) for employee in employees]
+    db.add_all(db_employees)
+    db.commit()
+    for emp in db_employees:
+        db.refresh(emp)
+    return db_employees
+
 def update_employee(db: Session, employee_id: int, employee_update: schemas.EmployeeCreate):
+
     db_employee = get_employee(db, employee_id)
     if db_employee:
         for key, value in employee_update.dict().items():

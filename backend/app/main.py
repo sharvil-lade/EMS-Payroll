@@ -21,4 +21,4 @@ app.include_router(payroll.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Employee Attendance & Payroll System"}
+    return {"message": "Welcome to EMS & Payroll System"}

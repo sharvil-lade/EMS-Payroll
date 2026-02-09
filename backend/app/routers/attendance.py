@@ -28,7 +28,7 @@ def logout_employee(employee_id: int, db: Session = Depends(get_db)):
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
     try:
-         return crud.check_out(db, employee_id)
+        return crud.check_out(db, employee_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

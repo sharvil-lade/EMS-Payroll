@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import CSVUpload from './CSVUpload';
 
 const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -35,8 +37,20 @@ const EmployeeList = () => {
     <div>
       <div className="header-actions">
         <h2>Employee List</h2>
-        <Link to="/employees/add" className="btn btn-primary">Add New Employee</Link>
+        <div>
+            <button 
+                className="btn btn-secondary" 
+                style={{marginRight: '10px'}}
+                onClick={() => setShowUpload(!showUpload)}
+            >
+                {showUpload ? 'Hide Upload' : 'Upload CSV'}
+            </button>
+            <Link to="/employees/add" className="btn btn-primary">Add New Employee</Link>
+        </div>
       </div>
+      
+      {showUpload && <CSVUpload onUploadSuccess={fetchEmployees} />}
+
       <table>
         <thead>
           <tr>

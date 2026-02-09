@@ -13,5 +13,7 @@ class SalaryReportResponse(BaseModel):
     start_date: date
     end_date: date
     total_hours: float
+    total_standard_hours: float
+    total_extra_hours: float
     hourly_rate: float
     total_pay: float

@@ -69,9 +69,15 @@ const PayrollReport = () => {
           <p><strong>Employee:</strong> {report.employee_name} (ID: {report.employee_id})</p>
           <p><strong>Period:</strong> {report.start_date} to {report.end_date}</p>
           <hr />
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+            <p><strong>Standard Hours:</strong> {report.total_standard_hours} hrs</p>
+            <p><strong>Extra Hours:</strong> {report.total_extra_hours} hrs</p>
+          </div>
           <p><strong>Total Hours Worked:</strong> {report.total_hours} hrs</p>
           <p><strong>Hourly Rate:</strong> ₹{report.hourly_rate}</p>
-          <h3 style={{color: '#27ae60'}}>Total Pay: ₹{report.total_pay}</h3>
+          <h3 style={{color: '#27ae60', marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px'}}>
+            Total Pay: ₹{report.total_pay}
+          </h3>
         </div>
       )}
     </div>

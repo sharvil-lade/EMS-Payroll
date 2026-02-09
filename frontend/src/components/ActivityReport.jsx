@@ -6,15 +6,14 @@ const ActivityReport = () => {
   const { id } = useParams();
   const [employee, setEmployee] = useState(null);
   const [activityData, setActivityData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  // Default to current month
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
   
   const [startDate, setStartDate] = useState(firstDay.toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(today.toISOString().split('T')[0]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
 
   useEffect(() => {
     fetchEmployee();
