@@ -16,7 +16,6 @@ def get_current_active_session(db: Session, employee_id: int):
 def check_in(db: Session, employee_id: int):
     today = datetime.now().date()
     
-    # Check if there is already an active session (login without logout)
     active_session = get_current_active_session(db, employee_id)
     
     if active_session:
@@ -33,7 +32,6 @@ def check_in(db: Session, employee_id: int):
     return new_attendance
 
 def check_out(db: Session, employee_id: int):
-    # Find the active session to close
     attendance = get_current_active_session(db, employee_id)
     
     if not attendance:
@@ -41,9 +39,8 @@ def check_out(db: Session, employee_id: int):
     
     attendance.logout_time = datetime.now()
     
-    # Calculate duration
     duration = attendance.logout_time - attendance.login_time
-    total_hours = duration.total_seconds() / 3600 # Convert to hours
+    total_hours = duration.total_seconds() / 3600
     attendance.total_hours = round(total_hours, 2)
     
     db.commit()
@@ -62,12 +59,9 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
     daily_map = {}
     
     for record in records:
-        # Sum total hours
-        # Handle case where total_hours might be None (incomplete session)
         if record.total_hours:
             total_hours += record.total_hours
             
-        # Group by date for daily breakdown
         d = record.date
         if d not in daily_map:
             daily_map[d] = {"sessions_count": 0, "total_hours": 0.0}
@@ -84,15 +78,13 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
             "total_hours": round(data["total_hours"], 2)
         })
     
-    # Sort breakdown by date
     daily_breakdown.sort(key=lambda x: x["date"])
 
-    return {
-        "employee_id": employee_id,
-        "start_date": start_date,
-        "end_date": end_date,
-        "total_hours": round(total_hours, 2),
-        "total_sessions": len(records),
-        "daily_breakdown": daily_breakdown
-    }
-
+return {
+    "employee_id": employee_id,
+    "start_date": start_date,
+    "end_date": end_date,
+    "total_hours": round(total_hours, 2),
+    "total_sessions": len(records),
+    "daily_breakdown": daily_breakdown
+}

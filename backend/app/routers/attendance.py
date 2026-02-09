@@ -12,7 +12,7 @@ router = APIRouter(
 
 @router.post("/login/{employee_id}", response_model=schemas.AttendanceResponse)
 def login_employee(employee_id: int, db: Session = Depends(get_db)):
-    # Verify employee exists
+
     db_employee = crud.get_employee(db, employee_id)
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
@@ -23,7 +23,7 @@ def login_employee(employee_id: int, db: Session = Depends(get_db)):
 
 @router.post("/logout/{employee_id}", response_model=schemas.AttendanceResponse)
 def logout_employee(employee_id: int, db: Session = Depends(get_db)):
-     # Verify employee exists
+
     db_employee = crud.get_employee(db, employee_id)
     if not db_employee:
         raise HTTPException(status_code=404, detail="Employee not found")
