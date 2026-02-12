@@ -71,10 +71,20 @@ const PayrollReport = () => {
           <hr />
           <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
             <p><strong>Standard Hours:</strong> {report.total_standard_hours} hrs</p>
-            <p><strong>Extra Hours:</strong> {report.total_extra_hours} hrs</p>
+            <p><strong>Overtime Hours:</strong> {report.total_overtime_hours} hrs</p>
           </div>
           <p><strong>Total Hours Worked:</strong> {report.total_hours} hrs</p>
-          <p><strong>Hourly Rate:</strong> ₹{report.hourly_rate}</p>
+          <hr />
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
+             <div>
+                <p><strong>Hourly Rate:</strong> ₹{report.hourly_rate}</p>
+                <p><strong>Standard Pay:</strong> ₹{report.standard_pay}</p>
+             </div>
+             <div>
+                <p><strong>Overtime Rate:</strong> ₹{report.overtime_rate}</p>
+                <p><strong>Overtime Pay:</strong> ₹{report.overtime_pay}</p>
+             </div>
+          </div>
           <h3 style={{color: '#27ae60', marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px'}}>
             Total Pay: ₹{report.total_pay}
           </h3>

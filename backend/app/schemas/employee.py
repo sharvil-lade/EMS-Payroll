@@ -8,6 +8,7 @@ class EmployeeBase(BaseModel):
     department: str
     role: str
     hourly_rate: float
+    overtime_rate: float = 0.0
     is_active: bool = True
 
 class EmployeeCreate(EmployeeBase):

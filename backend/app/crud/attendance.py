@@ -52,15 +52,19 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
     ).order_by(models.Attendance.date).all()
     
     total_hours = 0.0
+    total_standard_hours = 0.0
+    total_overtime_hours = 0.0
     daily_map = {}
     
     for record in records:
-        if record.total_hours:
-            total_hours += record.total_hours
-            
         d = record.date
         if d not in daily_map:
-            daily_map[d] = {"sessions_count": 0, "total_hours": 0.0}
+            daily_map[d] = {
+                "sessions_count": 0, 
+                "total_hours": 0.0,
+                "standard_hours": 0.0,
+                "overtime_hours": 0.0
+            }
         
         daily_map[d]["sessions_count"] += 1
         if record.total_hours:
@@ -68,10 +72,30 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
 
     daily_breakdown = []
     for d, data in daily_map.items():
+        day_total = data["total_hours"]
+        day_of_week = d.weekday() # 0=Monday, 6=Sunday
+
+        if day_of_week < 5: # Monday to Friday
+            stand_h = min(day_total, 8.0)
+            over_h = max(day_total - 8.0, 0.0)
+        else: # Saturday and Sunday
+            stand_h = 0.0
+            over_h = 0.0
+        
+        data["standard_hours"] = round(stand_h, 2)
+        data["overtime_hours"] = round(over_h, 2)
+        data["total_hours"] = round(day_total, 2)
+
+        total_hours += data["total_hours"]
+        total_standard_hours += data["standard_hours"]
+        total_overtime_hours += data["overtime_hours"]
+
         daily_breakdown.append({
             "date": d,
             "sessions_count": data["sessions_count"],
-            "total_hours": round(data["total_hours"], 2)
+            "total_hours": data["total_hours"],
+            "standard_hours": data["standard_hours"],
+            "overtime_hours": data["overtime_hours"]
         })
     
     daily_breakdown.sort(key=lambda x: x["date"])
@@ -81,6 +105,8 @@ def get_attendance_report(db: Session, employee_id: int, start_date: date, end_d
         "start_date": start_date,
         "end_date": end_date,
         "total_hours": round(total_hours, 2),
+        "total_standard_hours": round(total_standard_hours, 2),
+        "total_overtime_hours": round(total_overtime_hours, 2),
         "total_sessions": len(records),
         "daily_breakdown": daily_breakdown
     }

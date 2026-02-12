@@ -104,13 +104,15 @@ const ActivityReport = () => {
                 <tr>
                   <th>Date</th>
                   <th>Sessions Count</th>
-                  <th>Worked Hours</th>
+                  <th>Total Hours</th>
+                  <th>Standard Hours</th>
+                  <th>Overtime Hours</th>
                 </tr>
               </thead>
               <tbody>
                 {activityData.daily_breakdown.length === 0 ? (
                   <tr>
-                    <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: 'var(--secondary)' }}>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--secondary)' }}>
                       No activity found for this period.
                     </td>
                   </tr>
@@ -120,6 +122,8 @@ const ActivityReport = () => {
                       <td>{day.date}</td>
                       <td>{day.sessions_count}</td>
                       <td>{day.total_hours}</td>
+                      <td>{day.standard_hours}</td>
+                      <td>{day.overtime_hours}</td>
                     </tr>
                   ))
                 )}

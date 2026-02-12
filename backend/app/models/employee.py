@@ -13,6 +13,7 @@ class Employee(Base):
     role = Column(String)
     joining_date = Column(Date, default=datetime.now().date)
     hourly_rate = Column(Float)
+    overtime_rate = Column(Float, default=0.0)
     is_active = Column(Boolean, default=True)
 
     attendance_records = relationship("Attendance", back_populates="employee")

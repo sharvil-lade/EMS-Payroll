@@ -9,6 +9,7 @@ const EmployeeForm = () => {
     department: '',
     role: '',
     hourly_rate: 0,
+    overtime_rate: 0,
     is_active: true
   });
   const { id } = useParams();
@@ -72,6 +73,10 @@ const EmployeeForm = () => {
         <div className="form-group">
           <label>Hourly Pay Rate (₹)</label>
           <input type="number" name="hourly_rate" value={employee.hourly_rate} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+          <label>Overtime Pay Rate (₹)</label>
+          <input type="number" name="overtime_rate" value={employee.overtime_rate} onChange={handleChange} required />
         </div>
         <button type="submit" className="btn btn-success">{isEdit ? 'Update' : 'Create'}</button>
       </form>
