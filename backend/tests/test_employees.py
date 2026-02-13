@@ -1,3 +1,4 @@
+import io
 from fastapi.testclient import TestClient
 
 # Test: Create Employee
@@ -132,3 +133,77 @@ def test_delete_employee(client: TestClient):
     # Ensure deleted
     get_res = client.get(f"/employees/{employee_id}")
     assert get_res.status_code == 404
+
+
+# Test: Bulk Upload via CSV
+def test_upload_csv_success(client: TestClient):
+    csv_content = "name,email,department,role,hourly_rate\n"
+    csv_content += "Alice,alice@test.com,Engineering,Developer,50.0\n"
+    csv_content += "Bob,bob@test.com,HR,Manager,60.0\n"
+    csv_content += "Charlie,charlie@test.com,Finance,Analyst,55.0\n"
+
+    file = io.BytesIO(csv_content.encode("utf-8"))
+
+    response = client.post(
+        "/employees/upload-csv",
+        files={"file": ("employees.csv", file, "text/csv")},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert isinstance(data, list)
+    assert len(data) == 3
+
+    names = [emp["name"] for emp in data]
+    assert "Alice" in names
+    assert "Bob" in names
+    assert "Charlie" in names
+
+    for emp in data:
+        assert "id" in emp
+
+
+# Test: Upload Non-CSV File (Should Fail)
+def test_upload_invalid_file_type(client: TestClient):
+    file = io.BytesIO(b"some random content")
+
+    response = client.post(
+        "/employees/upload-csv",
+        files={"file": ("data.txt", file, "text/plain")},
+    )
+
+    assert response.status_code == 400
+    assert "Invalid file format" in response.json()["detail"]
+
+
+# Test: CSV with Missing Column (Should Fail)
+def test_upload_csv_missing_column(client: TestClient):
+    csv_content = "name,email,department,role\n"
+    csv_content += "Alice,alice@test.com,Engineering,Developer\n"
+
+    file = io.BytesIO(csv_content.encode("utf-8"))
+
+    response = client.post(
+        "/employees/upload-csv",
+        files={"file": ("employees.csv", file, "text/csv")},
+    )
+
+    assert response.status_code == 400
+    assert "Missing column" in response.json()["detail"]
+
+
+# Test: CSV with Invalid Data (Should Fail)
+def test_upload_csv_invalid_data(client: TestClient):
+    csv_content = "name,email,department,role,hourly_rate\n"
+    csv_content += "Alice,alice@test.com,Engineering,Developer,not_a_number\n"
+
+    file = io.BytesIO(csv_content.encode("utf-8"))
+
+    response = client.post(
+        "/employees/upload-csv",
+        files={"file": ("employees.csv", file, "text/csv")},
+    )
+
+    assert response.status_code == 400
+    assert "Invalid data" in response.json()["detail"]
