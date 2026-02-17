@@ -55,3 +55,45 @@ def test_payroll_calculation(client: TestClient, test_db):
     assert report["total_standard_hours"] == float(expected_standard)
     assert report["total_overtime_hours"] == float(expected_overtime)
     assert report["total_pay"] == float(expected_pay)
+
+
+def test_payroll_with_manual_attendance(client: TestClient, test_db):
+    # Create employee
+    res = client.post("/employees/", json={
+        "name": "Manual Payroll User",
+        "email": "manual_payroll@example.com",
+        "department": "Finance",
+        "role": "Analyst",
+        "hourly_rate": 100.0,
+        "overtime_rate": 150.0,
+    })
+    employee_id = res.json()["id"]
+
+    today = date.today()
+    
+    # Add manual entry for today (10 hours total: 8 std + 2 OT)
+    manual_res = client.post("/attendance/manual", json={
+        "employee_id": employee_id,
+        "date": str(today),
+        "standard_hours": 8.0,
+        "overtime_hours": 2.0
+    })
+    assert manual_res.status_code == 200
+
+    # Get Payroll Report
+    report_res = client.post("/payroll/report", json={
+        "employee_id": employee_id,
+        "start_date": str(today),
+        "end_date": str(today)
+    })
+    
+    assert report_res.status_code == 200
+    report = report_res.json()
+    
+    # Expected: 8 * 100 + 2 * 150 = 800 + 300 = 1100
+    expected_pay = (8.0 * 100.0) + (2.0 * 150.0)
+    
+    assert report["total_hours"] == 10.0
+    assert report["total_standard_hours"] == 8.0
+    assert report["total_overtime_hours"] == 2.0
+    assert report["total_pay"] == expected_pay

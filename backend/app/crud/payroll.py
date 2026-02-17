@@ -14,14 +14,35 @@ def calculate_payroll(db: Session, employee_id: int, start_date: date, end_date:
         models.Attendance.date >= start_date,
         models.Attendance.date <= end_date
     ).all()
+    
+    manual_records = db.query(models.ManualAttendance).filter(
+        models.ManualAttendance.employee_id == employee_id,
+        models.ManualAttendance.date >= start_date,
+        models.ManualAttendance.date <= end_date
+    ).all()
+
+    manual_map = {m.date: m for m in manual_records}
 
     overtime_rate = employee.overtime_rate if employee.overtime_rate else 0.0
 
     total_standard_hours = 0.0
     total_overtime_hours = 0.0
     total_hours = 0.0
+    
+    processed_dates = set()
+    
+    # 1. Process Manual Records first (they override everything)
+    for manual in manual_records:
+        total_standard_hours += manual.standard_hours
+        total_overtime_hours += manual.overtime_hours
+        total_hours += (manual.standard_hours + manual.overtime_hours)
+        processed_dates.add(manual.date)
 
+    # 2. Process Auto Records (only if not manually overridden)
     for record in attendance_records:
+        if record.date in processed_dates:
+            continue
+            
         day_of_week = record.date.weekday()
         
         if day_of_week < 5:

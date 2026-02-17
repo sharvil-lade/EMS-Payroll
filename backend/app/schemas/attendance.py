@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
 
 class AttendanceBase(BaseModel):
@@ -16,5 +16,27 @@ class AttendanceResponse(BaseModel):
     logout_time: Optional[datetime] = None
     total_hours: float
 
+    class Config:
+        orm_mode = True
+
+class AttendanceReportResponse(BaseModel):
+    employee_id: int
+    start_date: date
+    end_date: date
+    total_hours: float
+    total_standard_hours: float
+    total_overtime_hours: float
+    total_sessions: int
+    daily_breakdown: List[dict]
+
+class ManualAttendanceCreate(BaseModel):
+    employee_id: int
+    date: date
+    standard_hours: float
+    overtime_hours: float
+
+class ManualAttendanceResponse(ManualAttendanceCreate):
+    id: int
+    
     class Config:
         orm_mode = True
